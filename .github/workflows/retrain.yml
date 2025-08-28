@@ -4,7 +4,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 0 * * 0'  # Runs weekly on Sunday at midnight
+    - cron: '0 0 * * 5'  # Runs weekly on friday
   workflow_dispatch:
 jobs:
   retrain:
@@ -19,9 +19,13 @@ jobs:
         run: |
           pip install -r requirements.txt
       - name: Run training script
+        env: 
+          API_KEY: ${{ secrets.API_KEY }}
         run: |
           python train.py
       - name: Upload exported model
+        env: 
+          API_KEY: ${{ secrets.API_KEY }}
         uses: actions/upload-artifact@v4
         with:
           name: exported-model
@@ -41,5 +45,7 @@ jobs:
             echo "Waiting for TensorFlow Serving..."; sleep 2
           done
       - name: Test inference with model.py
+        env: 
+          API_KEYS: ${{ secrets.API_KEY }}
         run: |
           python model.py
