@@ -62,18 +62,19 @@ Example using CLI script (`model.py`):
 
 ---
 
+
 ## 📊 Monitoring (Prometheus)
 
-TensorFlow Serving exposes Prometheus metrics at:
+Prometheus metrics for your FastAPI gateway are available at:
 ```
-http://localhost:8501/monitoring/prometheus
+http://127.0.0.1:8000/metrics
 ```
 **Prometheus Scrape Config:**
 ```yaml
 scrape_configs:
-  - job_name: 'tensorflow_serving'
+  - job_name: 'fastapi_gateway'
     static_configs:
-      - targets: ['localhost:8501']
+      - targets: ['127.0.0.1:8000']
 ```
 
 ---
@@ -88,33 +89,5 @@ scrape_configs:
 ## 🤖 Automation (GitHub Actions)
 
 Automate retraining & deployment with GitHub Actions:
-```yaml
-name: Retrain and Promote Model
-on:
-  schedule:
-    - cron: '0 0 * * 0'  # Runs weekly on Sunday at midnight
-  workflow_dispatch:
 
-jobs:
-  retrain:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-      - name: Run training script
-        run: |
-          python train.py
-      - name: Upload exported model
-        uses: actions/upload-artifact@v3
-        with:
-          name: exported-model
-          path: models/
-```
 
----
