@@ -1,5 +1,7 @@
 tensorflow
 pandas
 numpy
+fastapi
+uvicorn
 requests
 scikit-learn

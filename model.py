@@ -25,8 +25,8 @@ test_samples = X_test_scaled[0:5]
 
 data = json.dumps({"instances": test_samples.tolist()})
 
-url = 'http://localhost:8501/v1/models/my_model:predict'  # Update if model name/version changes
-headers = {"content-type": "application/json"}
+url = 'http://localhost:8000/predict'  # FastAPI gateway endpoint
+headers = {"content-type": "application/json", "X-API-Key": "mysecretkey"}
 
 json_response = requests.post(url, data=data, headers=headers)
 
