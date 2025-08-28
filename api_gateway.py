@@ -1,9 +1,13 @@
+
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.security.api_key import APIKeyHeader
 import requests
 import os
+from dotenv import load_dotenv
 
-API_KEY = os.getenv("API_KEY", "mysecretkey")
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY", "cancermodel")
 API_KEY_NAME = "X-API-Key"
 TF_SERVING_URL = "http://localhost:8501/v1/models/my_model:predict"
 

@@ -21,12 +21,14 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-test_samples = X_test_scaled[0:5]
+test_samples = X_test_scaled[0:10]
 
 data = json.dumps({"instances": test_samples.tolist()})
 
+
 url = 'http://localhost:8000/predict'  # FastAPI gateway endpoint
-headers = {"content-type": "application/json", "X-API-Key": "mysecretkey"}
+api_key = input("Enter API Key: ")
+headers = {"content-type": "application/json", "X-API-Key": api_key}
 
 json_response = requests.post(url, data=data, headers=headers)
 
