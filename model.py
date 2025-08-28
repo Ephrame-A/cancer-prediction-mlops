@@ -1,9 +1,13 @@
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import requests
 import json
 import numpy as np
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 print("Loading Lung Cancer Dataset ...")
 df = pd.read_csv('./data/Lung Cancer Dataset.csv')
@@ -27,7 +31,7 @@ data = json.dumps({"instances": test_samples.tolist()})
 
 
 url = 'http://localhost:8000/predict'  # FastAPI gateway endpoint
-api_key = input("Enter API Key: ")
+api_key = os.getenv("API_KEY", "cancermodel")
 headers = {"content-type": "application/json", "X-API-Key": api_key}
 
 json_response = requests.post(url, data=data, headers=headers)
