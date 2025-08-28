@@ -31,8 +31,8 @@ data = json.dumps({"instances": test_samples.tolist()})
 
 
 url = 'http://localhost:8000/predict'  # FastAPI gateway endpoint
-api_key = os.getenv("API_KEY", "cancermodel")
-headers = {"content-type": "application/json", "X-API-Key": api_key}
+api_key = os.environ.get("API_KEY", "cancermodel")
+headers = {"content-type": "application/json", "x-api-key": api_key}
 
 json_response = requests.post(url, data=data, headers=headers)
 

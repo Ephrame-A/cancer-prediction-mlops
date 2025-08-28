@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("API_KEY", "cancermodel")
-API_KEY_NAME = "X-API-Key"
+API_KEY = os.environ.get("API_KEY", "cancermodel")
+API_KEY_NAME = "x-api-key"
 TF_SERVING_URL = "http://localhost:8501/v1/models/my_model:predict"
 
 app = FastAPI()

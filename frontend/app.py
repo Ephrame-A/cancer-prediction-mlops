@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 API_URL = "http://localhost:8000/predict"
-API_KEY = "mysecretkey"
+API_KEY = "cancermodel"
 
 COLUMNS = [
     "AGE", "GENDER", "SMOKING", "FINGER_DISCOLORATION", "MENTAL_STRESS", "EXPOSURE_TO_POLLUTION",
