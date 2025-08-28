@@ -39,7 +39,7 @@ json_response = requests.post(url, data=data, headers=headers)
 predictions = json.loads(json_response.text)['predictions']
 
 predicted_classes = [1 if pred[0] > 0.5 else 0 for pred in predictions]
-actual_classes = y_test.values.tolist()[0:5]
+actual_classes = y_test.values.tolist()[0:10]
 print("\nPredicted classes:")
 print(predicted_classes)
 print("Actual classes: ")

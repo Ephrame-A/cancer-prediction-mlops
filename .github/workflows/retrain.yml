@@ -46,6 +46,6 @@ jobs:
           done
       - name: Test inference with model.py
         env: 
-          API_KEYS: ${{ secrets.API_KEY }}
+          API_KEY: ${{ secrets.API_KEY }}
         run: |
           python model.py
