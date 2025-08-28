@@ -25,11 +25,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: exported-model
-          path: exports/
+          path: models/
       - name: Start TensorFlow Serving (Docker)
         run: |
           docker run -d --rm -p 8501:8501 \
-            -v ${{ github.workspace }}/exports:/models/my_model \
+            -v ${{ github.workspace }}/models:/models/my_model \
             -e MODEL_NAME=my_model \
             tensorflow/serving
       - name: Wait for TensorFlow Serving to start
@@ -40,6 +40,6 @@ jobs:
             fi
             echo "Waiting for TensorFlow Serving..."; sleep 2
           done
-      - name: Test inference with main.py
+      - name: Test inference with model.py
         run: |
-          python main.py
+          python model.py

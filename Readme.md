@@ -1,19 +1,47 @@
-## 1. Endpoint and API Documentation
 
-### **URL Structure**
-The endpoint for making predictions on your deployed model is:
-`http://localhost:8501/v1/models/my_model:predict`
-
--   `http://localhost:8501`: This is the host and port of your running TensorFlow Serving instance.
--   `/v1/models`: This is the standard path for the TensorFlow Serving REST API.
--   `/my_model`: This is the **model name** (`MODEL_NAME`) you set when running the Docker container.
--   `:predict`: This is the **verb** used to request an inference from the model.
+# 🚀 Lung Cancer Prediction ML Project
 
 ---
 
-## 2. Sample Request Code
+## 🗂️ Project Overview
 
-The following Python script demonstrates how to prepare data and send a POST request to your model endpoint. It also includes error handling by converting the NumPy array to a JSON-serializable list.
+This project predicts lung cancer risk using a machine learning model trained on a custom dataset. It features:
+- Model training and versioning
+- Secure API access via FastAPI gateway (API key authentication)
+- User-friendly Flask web frontend
+- CLI script for quick predictions
+
+---
+
+## 🟢 Endpoints & API Reference
+
+**TensorFlow Serving Endpoint:**
+```
+http://localhost:8501/v1/models/my_model:predict
+```
+
+**FastAPI Gateway Endpoint (with API key):**
+```
+http://localhost:8000/predict
+Header: X-API-Key: <your_api_key>
+```
+
+---
+
+## 🔑 API Key Authentication
+
+- The FastAPI gateway requires an API key in the `X-API-Key` header.
+- The key is loaded from a `.env` file (use `python-dotenv`). Example:
+  ```
+  API_KEY=your_secret_key
+  ```
+- Update your `.env` file to set/change the key.
+
+---
+
+## 🧑‍💻 Sample Request (Python)
+
+Example using CLI script (`model.py`):
 
 ```python
 import pandas as pd
@@ -23,7 +51,6 @@ import requests
 import json
 import numpy as np
 
-# Load and prepare data (Lung Cancer Dataset)
 print("Loading Lung Cancer Dataset ...")
 df = pd.read_csv('./data/Lung Cancer Dataset.csv')
 
@@ -32,9 +59,9 @@ X = df.iloc[:, :-1]
 y = df.iloc[:, -1]
 # Convert target to numeric if needed
 if y.dtype == object or y.apply(lambda v: isinstance(v, str)).any():
-  y = y.map({'YES': 1, 'NO': 0})
+    y = y.map({'YES': 1, 'NO': 0})
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=50)
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -42,58 +69,48 @@ X_test_scaled = scaler.transform(X_test)
 
 test_samples = X_test_scaled[0:5]
 
-# Prepare the JSON payload by converting the NumPy array to a list
-data_payload = json.dumps({"instances": test_samples.tolist()})
+data = json.dumps({"instances": test_samples.tolist()})
 
-# Define the endpoint and headers
-url = 'http://localhost:8501/v1/models/my_model:predict'
-headers = {"content-type": "application/json"}
+url = 'http://localhost:8000/predict'  # FastAPI gateway endpoint
+api_key = input("Enter API Key: ")
+headers = {"content-type": "application/json", "X-API-Key": api_key}
 
+json_response = requests.post(url, data=data, headers=headers)
 
-# 🚀 Lung Cancer Prediction Model API & Deployment Guide
+predictions = json.loads(json_response.text)['predictions']
 
-
-## 🟢 1. Endpoint & API Reference
-
-**Prediction Endpoint:**
-
-```text
-http://localhost:8501/v1/models/my_model:predict
+predicted_classes = [1 if pred[0] > 0.5 else 0 for pred in predictions]
+actual_classes = y_test.values.tolist()[0:5]
+print("\nPredicted classes:")
+print(predicted_classes)
+print("Actual classes: ")
+print(actual_classes)
 ```
 
-| Component         | Description                                                        |
-|-------------------|--------------------------------------------------------------------|
-| `localhost:8501`  | Host & port of TensorFlow Serving                                  |
-| `/v1/models`      | REST API base path                                                 |
-| `/my_model`       | Model name (set via Docker `MODEL_NAME` env)                      |
-| `:predict`        | REST verb for inference                                            |
+---
 
+## 🌐 Flask Web Frontend
 
-## 🧑‍💻 2. Sample Request (Python)
+- Located in `frontend/app.py`
+- Users enter feature values and their API key in a styled web form
+- Prediction is displayed as "Positive" or "Negative"
 
-> Prepares data, sends a POST request, and handles errors. Uses the Lung Cancer Dataset.
+---
 
-```python
-...existing code...
-```
+## 🔄 Model Training & Promotion
 
-
-## 🔄 3. Promotion & Rollback Logic
-
-- `train.py` checks if new model accuracy ≥ **90%**
-- If passed, model is saved in a new versioned folder (e.g., `models/2/`)
+- `train.py` trains the model and saves it in a versioned `models` folder if accuracy ≥ 90%
 - TensorFlow Serving automatically serves the highest version
-- If failed, previous version remains active (no rollback needed)
+- Previous versions are retained for rollback
 
+---
 
-## 📊 4. Monitoring (Prometheus)
+## 📊 Monitoring (Prometheus)
 
 TensorFlow Serving exposes Prometheus metrics at:
-
-```text
+```
 http://localhost:8501/monitoring/prometheus
 ```
-
 **Prometheus Scrape Config:**
 ```yaml
 scrape_configs:
@@ -102,69 +119,45 @@ scrape_configs:
       - targets: ['localhost:8501']
 ```
 
+---
 
-## 🧪 5. Canary Testing
+## 🧪 Canary Testing
 
-To canary test a new model version:
 - Send requests to `/v1/models/my_model/versions/<version>:predict`
 - Compare predictions with previous version
 
-**Example:**
-```python
-...existing code...
-```
+---
 
-
-## 🤖 6. Automation (GitHub Actions)
+## 🤖 Automation (GitHub Actions)
 
 Automate retraining & deployment with GitHub Actions:
-
 ```yaml
-...existing code...
-```
+name: Retrain and Promote Model
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs weekly on Sunday at midnight
+  workflow_dispatch:
 
-
-## 🧬 7. Canary Test Script Example
-
-```python
-...existing code...
-```
-
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run training script
         run: |
           python train.py
       - name: Upload exported model
         uses: actions/upload-artifact@v3
         with:
           name: exported-model
-          path: exports/
-```
-
----
-
-## 7. Canary Test Script Example
-
-```python
-import requests
-import json
-import numpy as np
-
-# Prepare test data (replace with your own test samples)
-test_samples = np.random.rand(5, 17)  # Example shape for lung cancer dataset
-
-# Predict with previous version
-url_prev = 'http://localhost:8501/v1/models/my_model/versions/1:predict'
-headers = {"content-type": "application/json"}
-data = json.dumps({"instances": test_samples.tolist()})
-response_prev = requests.post(url_prev, data=data, headers=headers)
-preds_prev = json.loads(response_prev.text)['predictions']
-
-# Predict with new version
-url_new = 'http://localhost:8501/v1/models/my_model/versions/2:predict'
-response_new = requests.post(url_new, data=data, headers=headers)
-preds_new = json.loads(response_new.text)['predictions']
-
-print('Previous version predictions:', preds_prev)
-print('New version predictions:', preds_new)
+          path: models/
 ```
 
 ---
