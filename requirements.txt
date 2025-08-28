@@ -6,3 +6,4 @@ uvicorn
 requests
 scikit-learn
 dotenv
+prometheus_fastapi_instrumentator

@@ -4,7 +4,7 @@ from fastapi.security.api_key import APIKeyHeader
 import requests
 import os
 from dotenv import load_dotenv
-
+from prometheus_fastapi_instrumentator import Instrumentator
 load_dotenv()
 
 API_KEY = os.environ.get("API_KEY", "cancermodel")
@@ -12,6 +12,7 @@ API_KEY_NAME = "x-api-key"
 TF_SERVING_URL = "http://localhost:8501/v1/models/my_model:predict"
 
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 def get_api_key(api_key: str = Depends(api_key_header)):
